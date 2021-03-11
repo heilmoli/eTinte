@@ -1,0 +1,11 @@
+[package]
+name = "epdriver"
+version = "0.1.0"
+authors = ["Oliver Heilmann <o.heilmann@gmail.com>"]
+edition = "2018"
+description = "driver and tools for some waveshare e-paper displays "
+
+[dependencies]
+bitflags = "1.2.1"
+embedded-hal = { version = "0.2.4", features = ["unproven"] }
+
