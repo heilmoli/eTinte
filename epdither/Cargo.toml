@@ -1,0 +1,33 @@
+[package]
+name = "epdither"
+version = "0.1.0"
+authors = ["Oliver Heilmann <o.heilmann@gmail.com>"]
+edition = "2018"
+
+# See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
+[profile.release]
+lto = true
+codegen-units = 1
+panic = 'abort'
+opt-level = 'z'
+
+[dependencies]
+# [target.'cfg(linux)'.dependencies.linux-embedded-hal]
+# version = "0.3.0"
+
+dither = "1.3.9"
+
+rand =  "0.8.3"
+
+image = "0.23.14"
+
+# structopt = "0.3.14"
+gumdrop = "0.8.0"
+
+linux-embedded-hal = { git="https://github.com/rust-embedded/linux-embedded-hal", rev="25bf2be", features = ["gpio_cdev"] }
+
+# embedded-hal = "1.0.0-alpha.1"
+embedded-hal = { version = "0.2.4", features = ["unproven"] }
+
+epdriver = { path = "../epdriver" }
+
