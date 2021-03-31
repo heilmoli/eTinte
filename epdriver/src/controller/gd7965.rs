@@ -181,11 +181,12 @@ impl<T> GD7965<T> where T: DisplayConnector {
 
     #[allow(dead_code)]
     pub fn await_ready_state(&mut self) -> Result<()> {
+        self.connector.delay_ms(100);
         self.connector.send_command(0x71)?;
         while self.connector.is_busy()? {
-            self.connector.delay_ms(100)?;
             self.connector.send_command(0x71)?;
         }
+        self.connector.delay_ms(200)?;
         /*
                 self.connector.send_command(0x71)?;
         while self.connector.is_busy()? { self.connector.delay_ms(1)?; }

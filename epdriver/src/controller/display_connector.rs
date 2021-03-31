@@ -80,7 +80,9 @@ impl<SPI, OUT, IN, DELAY> DisplayConnector for SpiConnector<SPI, OUT, IN, DELAY>
 
     fn send_command(&mut self, command: u8) -> Result<()> {
         self.dc.set_low().map_err(|_e| Error::DcPinWriteError)?;
-        self.write(&[command])
+        self.write(&[command])?;
+        self.delay.delay_ms(4);
+        Ok(())
     }
 
     fn send_data_with<F>(&mut self, repeats: u32, source: F) -> Result<()> where F: Fn(u32) -> u8 {
@@ -103,6 +105,7 @@ impl<SPI, OUT, IN, DELAY> DisplayConnector for SpiConnector<SPI, OUT, IN, DELAY>
         if i > 0 {
             self.send_data(&buffer[0..i])?;
         }
+        self.delay.delay_ms(4);
         //  self.send_command(0x11);
         self.tmp_buffer = Some(buffer);
         Result::Ok(())
@@ -110,7 +113,8 @@ impl<SPI, OUT, IN, DELAY> DisplayConnector for SpiConnector<SPI, OUT, IN, DELAY>
 
     fn send_data(&mut self, data: &[u8]) -> Result<()> {
         self.dc.set_high().map_err(|_e| Error::DcPinWriteError)?;
-        self.write(data)
+        self.write(data)?;
+        Ok(())
     }
 
     fn delay_ms(&mut self, ms: u16) -> Result<()> {

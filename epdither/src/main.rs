@@ -181,7 +181,9 @@ fn init_display(verbose:bool) -> impl EPaperDisplay {
         busy,
         Delay {},
         1024);
+
     display.init().expect("failed to init display");
+
     if verbose {
         println!("display ready")
     }

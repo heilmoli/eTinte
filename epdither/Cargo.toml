@@ -21,7 +21,6 @@ rand =  "0.8.3"
 
 image = "0.23.14"
 
-# structopt = "0.3.14"
 gumdrop = "0.8.0"
 
 linux-embedded-hal = { git="https://github.com/rust-embedded/linux-embedded-hal", rev="25bf2be", features = ["gpio_cdev"] }

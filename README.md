@@ -21,6 +21,14 @@ This seems to be the same product as the [UC8159C](https://www.buydisplay.com/do
 Seems to be an update version of the above product, used by the 800x480 display
 Specs can be found [here](https://www.e-paper-display.com/download_detail/downloadsId%3d821.html) or [here](https://www.waveshare.com/w/upload/4/44/7.5inch_e-Paper_B_V2_Specification.pdf)
 
-#### building epdither for raspberry pi
+#### building epdither for raspberry pi zero
+
+##### cross compiling for linux 
+
+* sudo apt install gcc-arm-linux-gnueabi
+* rustup target install arm-unknown-linux-gnueabi
+* create cargo build config
+
+###### install the target 
 
 ##
