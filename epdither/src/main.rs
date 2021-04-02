@@ -192,7 +192,7 @@ fn init_display(verbose:bool) -> impl EPaperDisplay {
 
 fn dither_image(d_img : DynamicImage)  -> dither::Result<Img<RGB<u8>>> {
 
-    let rgb_img = d_img.to_rgb();
+    let rgb_img = d_img.to_rgb8();
     let rgb_buffer: Vec<RGB<u8>> = rgb_img.pixels().map(|p| RGB::from(p.0)).collect();
 
     let img= Img::<RGB<u8>>::new(rgb_buffer, d_img.width()).expect("dither image instantiation").convert_with(|rgb| rgb.convert_with(f64::from));

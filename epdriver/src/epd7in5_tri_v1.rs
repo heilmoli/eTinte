@@ -54,17 +54,19 @@ impl<SPI, OUT, IN, DELAY> EPaperDisplay for EPaper75TriColour<SPI, OUT, IN, DELA
         self.controller.reset()?;
         self.controller.pwr_power_setting(PWRFlags::EDATA_SEL | PWRFlags::EDATA_SET | PWRFlags::VSOURCE_LV_EN | PWRFlags::VSOURCE_EN | PWRFlags::VGATE_EN)?;
         self.controller.psr_panel_setting(PSRFlags::RES_600_448 | PSRFlags::UD | PSRFlags::SHL | PSRFlags::SHD_N | PSRFlags::RST_N | PSRFlags::MYSTERY)?;
-        self.controller.btst_booster_soft_start(0xc7, 0xcc, 0x28)?;
-        self.controller.pon_power_on()?;
-        self.controller.await_ready_state()?;
         self.controller.pll_control(0x3c)?;
-        self.controller.tse_temperature_sensor_calibration(false, 0)?;
+        self.controller.vcom_dc_setting(0x1E)?;
+        self.controller.btst_booster_soft_start(0xc7, 0xcc, 0x28)?;
         self.controller.cdi_vcom_and_data_interval_settings(3, true, 7)?;
         self.controller.tcon_setting(0x22)?;
+        self.controller.dam_spi_flash_control(false)?;
         self.controller.tres_resolution(self.width, self.height)?;
-        self.controller.vcom_dc_setting(0x1E)?;
-     //   self.controller.dam_spi_flash_control(false)?;
         self.controller.define_flash(3)
+
+        // self.controller.pon_power_on()?;
+        // self.controller.await_ready_state()?;
+        // self.controller.tse_temperature_sensor_calibration(false, 0)?;
+
     }
 
     fn clear(&mut self) -> Result<()>{
@@ -74,7 +76,7 @@ impl<SPI, OUT, IN, DELAY> EPaperDisplay for EPaper75TriColour<SPI, OUT, IN, DELA
         self.controller.await_ready_state()?;
         self.controller.drf_display_refresh()?;
         self.controller.await_ready_state()?;
-        self.controller.pof_power_off()
+//        self.controller.pof_power_off()
     }
 
     fn push_image_with<F>(&mut self, source: F) -> Result<()> where F: Fn(u32, u32) -> u8 {

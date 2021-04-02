@@ -39,14 +39,11 @@ impl<SPI, OUT, IN, DELAY> EPaper75TriColourV2<SPI, OUT, IN, DELAY> where SPI: Wr
         self.controller.await_ready_state()?;
         self.controller.pof_power_off()
     }
-
-
 }
 
 impl<SPI, OUT, IN, DELAY> EPaperDisplay for EPaper75TriColourV2<SPI, OUT, IN, DELAY> where SPI: Write<u8> + Transfer<u8>, OUT: OutputPin, IN: InputPin, DELAY: DelayMs<u16> {
     fn init(&mut self) -> Result<()> {
         self.controller.reset()?;
-    //    self.controller.await_ready_state()?;
         self.controller.pwr_power_setting(PWRFlags::VSR_EN | PWRFlags::VS_EN | PWRFlags::VG_EN | PWRFlags::VG_LVL_20V, 15.0, -15.0, 3.0)?;
         self.controller.pon_power_on()?;
         self.controller.await_ready_state()?;
@@ -101,9 +98,9 @@ impl<SPI, OUT, IN, DELAY> EPaperDisplay for EPaper75TriColourV2<SPI, OUT, IN, DE
 
 
 
-        self.controller.pon_power_on()?;
-        self.controller.await_ready_state()?;
-        self.controller.drf_display_refresh();
+        // self.controller.pon_power_on()?;
+        // self.controller.await_ready_state()?;
+         self.controller.drf_display_refresh();
         self.controller.await_ready_state()
 
         // think this fixes high contrast situations like lines
