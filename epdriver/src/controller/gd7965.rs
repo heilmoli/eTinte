@@ -157,7 +157,6 @@ impl<T> GD7965<T> where T: DisplayConnector {
     pub fn transmit(&mut self, data: &[u8]) -> Result<()> {
         self.connector.send_command(0x10)?;
         self.connector.send_data(data)
-        //    self.connector.send_command(0x11);
     }
 
     #[allow(dead_code)]
@@ -275,7 +274,7 @@ mod tests {
         let mut data_bytes = Vec::new();
         let mut driver = GD7965::new(DataRecorder { cmds : & mut cmd_bytes, data: & mut data_bytes });
 
-        driver.tres_tcon_resolution(800,480);
+        driver.tres_resolution(800,480);
 
         assert_eq!(cmd_bytes.len(), 1);
         assert_eq!(data_bytes.len(), 4);

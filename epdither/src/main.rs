@@ -1,25 +1,22 @@
-
-use image;
-use dither::ditherer::{Dither};
 use std::path::Path;
-use image::{GenericImageView, DynamicImage};
-use dither::color::palette;
-use dither::{clamp_f64_to_u8, ditherer};
-use epdriver::{EPaper75TriColour, EPaper75TriColourV2, EPaperDisplay, DisplayError};
-
-use linux_embedded_hal::{spidev::{SpiModeFlags, SpidevOptions}, Spidev, CdevPin, Delay, SysfsPin};
-use image::imageops::{FilterType};
-use  rand::prelude::*;
 use std::path::PathBuf;
-use gumdrop::Options;
 use std::str::FromStr;
-use crate::CropAlign::{TopLeft, Centre};
-use dither::prelude::{Img, RGB};
-use linux_embedded_hal::gpio_cdev::{Chip, LineRequestFlags};
-use embedded_hal::digital::v2::InputPin;
-use embedded_hal::digital::v2::OutputPin;
-use linux_embedded_hal::sysfs_gpio::{Pin, Direction};
 
+use dither::{clamp_f64_to_u8, ditherer};
+use dither::color::palette;
+use dither::ditherer::Dither;
+use dither::prelude::{Img, RGB};
+use gumdrop::Options;
+use image;
+use image::{DynamicImage, GenericImageView};
+use image::imageops::FilterType;
+use linux_embedded_hal::{CdevPin, Delay, spidev::{SpidevOptions, SpiModeFlags}, Spidev};
+use linux_embedded_hal::gpio_cdev::{Chip, LineRequestFlags};
+
+use epdriver::{DisplayError, EPaper75TriColour, EPaper75TriColourV2, EPaperDisplay};
+use epdriver::display_connector::SpiConnector;
+
+use crate::CropAlign::{Centre, TopLeft};
 
 #[derive(Debug)]
 enum CropAlign {
@@ -174,13 +171,9 @@ fn init_display(verbose:bool) -> impl EPaperDisplay {
         println!("pins ready done")
     }
 
-    let mut display = EPaper75TriColourV2::new(
-        spi,
-        rst,
-        dc,
-        busy,
-        Delay {},
-        1024);
+    let connector = SpiConnector::new(spi, rst, dc, busy, Delay {}, 1024);
+
+    let mut display = EPaper75TriColourV2::new(connector);
 
     display.init().expect("failed to init display");
 

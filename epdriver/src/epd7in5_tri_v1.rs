@@ -1,24 +1,18 @@
 use crate::controller::il0371::*;
 
-use embedded_hal::blocking::delay::DelayMs;
-use embedded_hal::blocking::spi::{Write, Transfer};
-use embedded_hal::digital::v2::{OutputPin, InputPin};
-use crate::controller::display_connector::SpiConnector;
+use crate::controller::display_connector::{DisplayConnector, Result};
 
-use crate::controller::display_connector::Result;
 use crate::controller::gd7965::GD7965;
 use crate::display::EPaperDisplay;
 
-pub struct EPaper75TriColour<SPI, OUT, IN, DELAY> where SPI: Write<u8> + Transfer<u8>, OUT: OutputPin, IN: InputPin, DELAY: DelayMs<u16> {
-    controller: IL0371<SpiConnector<SPI, OUT, IN, DELAY>>,
+pub struct EPaper75TriColour<T : DisplayConnector> {
+    controller: IL0371<T>,
     pub width: u16,
     pub height: u16,
 }
 
-impl<SPI, OUT, IN, DELAY> EPaper75TriColour<SPI, OUT, IN, DELAY> where SPI: Write<u8> + Transfer<u8>, OUT: OutputPin, IN: InputPin, DELAY: DelayMs<u16> {
-    pub fn new(spi: SPI, rst: OUT, dc: OUT, busy: IN, delay: DELAY, chunk_size: usize) -> EPaper75TriColour<SPI, OUT, IN, DELAY> where SPI: Write<u8> + Transfer<u8>, OUT: OutputPin, IN: InputPin, DELAY: DelayMs<u16>{
-
-        let connector = SpiConnector::new(spi, rst, dc, busy, delay, chunk_size); // TODO: set buffer size here
+impl<T: DisplayConnector> EPaper75TriColour<T>  {
+    pub fn new(connector : T) -> EPaper75TriColour<T> {
         let controller = IL0371::new(connector);
         EPaper75TriColour { controller, width: 640, height: 384 }
     }
@@ -48,7 +42,7 @@ impl<SPI, OUT, IN, DELAY> EPaper75TriColour<SPI, OUT, IN, DELAY> where SPI: Writ
     }
 }
 
-impl<SPI, OUT, IN, DELAY> EPaperDisplay for EPaper75TriColour<SPI, OUT, IN, DELAY> where SPI: Write<u8> + Transfer<u8>, OUT: OutputPin, IN: InputPin, DELAY: DelayMs<u16> {
+impl<T : DisplayConnector> EPaperDisplay for EPaper75TriColour<T> {
 
     fn init(&mut self) -> Result<()> {
         self.controller.reset()?;
@@ -75,7 +69,7 @@ impl<SPI, OUT, IN, DELAY> EPaperDisplay for EPaper75TriColour<SPI, OUT, IN, DELA
         self.controller.pon_power_on()?;
         self.controller.await_ready_state()?;
         self.controller.drf_display_refresh()?;
-        self.controller.await_ready_state()?;
+        self.controller.await_ready_state()
 //        self.controller.pof_power_off()
     }
 
@@ -114,104 +108,4 @@ impl<SPI, OUT, IN, DELAY> EPaperDisplay for EPaper75TriColour<SPI, OUT, IN, DELA
     fn height(&self) -> u16 {
         self.height
     }
-}
-
-
-#[cfg(test)]
-mod tests {
-    use embedded_hal::blocking::spi::{Write, Transfer};
-    use embedded_hal::blocking::delay::DelayMs;
-    use embedded_hal::digital::v2::{ InputPin, OutputPin };
-    use crate::epd7in5_tri_v1::EPaper75TriColour;
-    use crate::display::EPaperDisplay;
-
-    struct MockPin {
-        name: &'static str,
-        state: bool,
-    }
-
-    impl OutputPin for MockPin {
-        type Error = ();
-
-        fn set_low(&mut self) -> Result<(), Self::Error> {
-            self.state = false;
-            Result::Ok(())
-        }
-
-        fn set_high(&mut self) -> Result<(), Self::Error> {
-            self.state = true;
-            Result::Ok(())
-        }
-    }
-
-    impl InputPin for MockPin {
-        type Error = ();
-
-        fn is_high(&self) -> Result<bool, Self::Error> {
-            Result::Ok(self.state)
-        }
-
-        fn is_low(&self) -> Result<bool, Self::Error> {
-            Result::Ok(!self.state)
-        }
-    }
-
-
-    struct MockSpi {}
-
-    impl Write<u8> for MockSpi {
-        type Error = ();
-
-        fn write(&mut self, words: &[u8]) -> Result<(), Self::Error> {
-            Result::Ok(())
-        }
-    }
-
-    impl Transfer<u8> for MockSpi {
-        type Error = ();
-
-        fn transfer<'w>(&mut self, words: &'w mut [u8]) -> Result<&'w [u8], Self::Error> {
-            Result::Ok(&[])
-        }
-    }
-
-    struct MockDelay {}
-
-    impl DelayMs<u16> for MockDelay {
-        fn delay_ms(&mut self, ms: u16) {}
-    }
-
-    #[test]
-    fn test_init() {
-        let mut display = EPaper75TriColour::new(
-            MockSpi {},
-            MockPin { name: "rst", state: true },
-            MockPin { name: "dc", state: true },
-            MockPin { name: "busy", state: true },
-            MockDelay {},
-            4096);
-        display.init();
-    }
-
-    #[test]
-    fn test_push_image_with() {
-        let mut display = EPaper75TriColour::new(
-            MockSpi {},
-            MockPin { name: "rst", state: true },
-            MockPin { name: "dc", state: true },
-            MockPin { name: "busy", state: true },
-            MockDelay {},
-            4096);
-        display.push_image_with(|x,y| {
-            let xr = x as i32 - 100;
-            let yr= y as i32 - 100;
-            return 0; //if xr*xr+yr*yr > 100 { 1 } else { 2 };
-        });
-    }
-
-    #[test]
-    fn test_nothing() {
-
-    }
-
 }

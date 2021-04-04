@@ -1,25 +1,19 @@
 use crate::controller::il0371::*;
 
-use embedded_hal::blocking::delay::DelayMs;
-use embedded_hal::blocking::spi::{Write, Transfer};
-use embedded_hal::digital::v2::{OutputPin, InputPin};
-use crate::controller::display_connector::SpiConnector;
+use crate::controller::display_connector::{DisplayConnector, Result};
 
-use crate::controller::display_connector::Result;
 use crate::controller::gd7965::{ GD7965, PWRFlags, PSRFlags };
 use crate::display::EPaperDisplay;
 
 
-pub struct EPaper75TriColourV2<SPI, OUT, IN, DELAY> where SPI: Write<u8> + Transfer<u8>, OUT: OutputPin, IN: InputPin, DELAY: DelayMs<u16> {
-    controller: GD7965<SpiConnector<SPI, OUT, IN, DELAY>>,
+pub struct EPaper75TriColourV2<T : DisplayConnector> {
+    controller: GD7965<T>,
     pub width: u16,
     pub height: u16,
 }
 
-impl<SPI, OUT, IN, DELAY> EPaper75TriColourV2<SPI, OUT, IN, DELAY> where SPI: Write<u8> + Transfer<u8>, OUT: OutputPin, IN: InputPin, DELAY: DelayMs<u16> {
-    pub fn new(spi: SPI, rst: OUT, dc: OUT, busy: IN, delay: DELAY, chunk_size: usize) -> EPaper75TriColourV2<SPI, OUT, IN, DELAY> where SPI: Write<u8> + Transfer<u8>, OUT: OutputPin, IN: InputPin, DELAY: DelayMs<u16>{
-
-        let connector = SpiConnector::new(spi, rst, dc, busy, delay, chunk_size); // TODO: set buffer size here
+impl<T : DisplayConnector> EPaper75TriColourV2<T> {
+    pub fn new(connector : T) -> EPaper75TriColourV2<T> {
         let controller = GD7965::new(connector);
         EPaper75TriColourV2 { controller, width: 800, height: 480 }
     }
@@ -41,7 +35,7 @@ impl<SPI, OUT, IN, DELAY> EPaper75TriColourV2<SPI, OUT, IN, DELAY> where SPI: Wr
     }
 }
 
-impl<SPI, OUT, IN, DELAY> EPaperDisplay for EPaper75TriColourV2<SPI, OUT, IN, DELAY> where SPI: Write<u8> + Transfer<u8>, OUT: OutputPin, IN: InputPin, DELAY: DelayMs<u16> {
+impl<T : DisplayConnector> EPaperDisplay for EPaper75TriColourV2<T> {
     fn init(&mut self) -> Result<()> {
         self.controller.reset()?;
         self.controller.pwr_power_setting(PWRFlags::VSR_EN | PWRFlags::VS_EN | PWRFlags::VG_EN | PWRFlags::VG_LVL_20V, 15.0, -15.0, 3.0)?;

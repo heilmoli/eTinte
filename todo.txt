@@ -1,6 +1,11 @@
 impl drop on connector:
 spi close/ rst and dc to low
 
-don't take pins, take a connector
-
 debug connector
+
+clean up lints
+
+fix flip
+fix display connection
+
+publish crates

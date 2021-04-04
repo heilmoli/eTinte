@@ -42,7 +42,7 @@ pub struct SpiConnector<SPI, OUT, IN, DELAY> where SPI: Write<u8> + Transfer<u8>
 
 
 impl<SPI, OUT, IN, DELAY> SpiConnector<SPI, OUT, IN, DELAY> where SPI: Write<u8> + Transfer<u8>, OUT: OutputPin, IN: InputPin, DELAY: DelayMs<u16> {
-    pub(crate) fn new(spi: SPI, rst: OUT, dc: OUT, busy: IN, delay: DELAY, chunk_size: usize) -> SpiConnector<SPI, OUT, IN, DELAY> {
+    pub fn new(spi: SPI, rst: OUT, dc: OUT, busy: IN, delay: DELAY, chunk_size: usize) -> SpiConnector<SPI, OUT, IN, DELAY> {
         SpiConnector {
             spi,
             rst,
